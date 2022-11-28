@@ -1,0 +1,313 @@
+openapi: 3.0.3
+
+info:
+  title: Gostudy API
+  description: Gostudy API
+  version: 1.0.0
+tags:
+  - name: content
+    description: Для формирования контента
+  - name: payments
+    description: Для платежных операций
+  - name: misc
+    description: Прочее  
+servers:
+  - url: https://gostudy.cz/cabinet
+paths:
+  /arrival/arrivalStatus:
+    get:
+      tags:
+        - content
+      description: Arrival status
+      summary: Arrival status
+      responses:
+        200:
+          description: Description
+          content: 
+            application/json:
+              schema:
+                type: object
+        400:
+          description: Некорректный запрос
+          content: 
+            text/html:
+              schema:
+                type: string
+        403:
+          $ref: '#/components/responses/403.BitrixAccessDenied'
+        301:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/500.BitrixFail'
+        503:
+          $ref: '#/components/responses/503.ErrorContactData'
+  /cabinet/payment/getOrdersData:
+    get:
+      tags:
+        - content
+      summary: Получает данные о контенте Личного кабинета
+      responses:
+        200:
+          description: Набор данных для формирования контента Личного кабинета (все данные единым запросом, около 1.5Мб данных)
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  additional_online_payment_url:
+                    type: string
+                  additional_payment_types:
+                    type: object
+                  catalog_section_ids:
+                    type: object
+                  cityList:
+                    type: object
+                  contact:
+                    type: object
+                  currencies:
+                    type: object
+                  deal_list:
+                    type: object
+                    description: |
+                      Список связанных сделок, в рамках сделки: список доступных к покупке услуг, ответственный менеджер, счета оплаченные/неоплаченные, характеристики сделки (валюта, способ оплаты, подписание договора, все возможные параметры), договора к подписанию, способы доставки, все офисыы посольств, порядок прохождения процесса получения визы
+                  editable_deals_ids:
+                    type: object
+                  empty_deals:
+                    type: object
+                  full_deals:
+                    type: object
+                    description: Повторение deal_list
+                  insurance_deals: {}
+                  insurance_list: {}
+                  invoiceCategories:
+                    type: object
+                  invoiceProperties:
+                    type: object
+                  onlinePrograms:
+                    type: object
+                  payment_types:
+                    type: object
+                  productSectionIds:
+                    type: object
+                  productSectionsToShow:
+                    type: object
+                  product_sections:
+                    type: object
+                  products:
+                    type: object
+                  program_links: {}
+                  promoCodeToApply: {}
+                  specialtyList:
+                    type: object
+                  specialOfferStatuses:
+                    type: object
+                  transferOptions:
+                    type: object
+                    description: Список опций трансфера (города, способы проезда, направления, услуги)
+                    properties:
+                      cities:
+                        type: object
+                      transports:
+                        type: object
+                      destinations:
+                        type: object
+                      services:
+                        type: object
+                  universityBlockContent: {}
+components:
+  securitySchemes:
+    cookieAuthPlusCSRF:
+      type: apiKey
+      in: cookie
+      name: PHPSESSID
+  schemas:
+    cp_user:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: User ID
+        role_id:
+          type: boolean
+          description: Role ID
+        group_id:
+          type: boolean
+          x-nullable: true
+          description: Role ID
+        username:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+          x-nullable: true
+          description: User login (email)
+          example: mail@mail.ru
+        date_created:
+          type: string
+          format: date-time
+          x-nullable: true
+        form_filled:
+          type: boolean
+        visa_start:
+          type: string
+          format: date-time
+          x-nullable: true
+        visa_end:
+          type: string
+          format: date-time
+          x-nullable: true
+        visa_type:
+          type: string
+          x-nullable: true
+        visa_comment:
+          type: string
+          x-nullable: true
+        arrival_date:
+          type: string
+          format: date-time
+          x-nullable: true
+        arrival_city:
+          type: string
+          x-nullable: true
+        arrival_transport:
+          type: string
+          x-nullable: true
+        arrival_transport_info:
+          type: string
+          x-nullable: true
+        arrival_comment:
+          type: string
+          x-nullable: true
+        crm_id:
+          type: integer
+          format: int64
+          x-nullable: true
+          description: Bitrix24 CRM ID
+        partner_id:
+          type: integer
+          format: int64
+          x-nullable: true
+          description: Partner flag
+        is_blocked:
+          type: boolean
+        block_reason:
+          type: string
+          x-nullable: true
+  responses:
+    404.NotFound:
+      description: Not found
+      content:
+        text/html:
+          schema:
+            type: string
+    Unauthorized:
+      description: Unauthorized
+      content:
+        text/html:
+          schema:
+            type: string
+    400.CSRFFail:
+      description: The CSRF token could not be verified
+      content:
+        text/html:
+          schema:
+            type: string
+    401.UserNotFound:
+      description: User model has not been found
+      content:
+        text/html:
+          schema:
+            type: string
+    403.NoAjaxRequestType:
+      description: Not an Ajax request type
+      content:
+        application/json:
+          schema:
+            type: object
+    403.WrongCredsJson:
+      description: Bitrix24 access denied
+      content:
+        application/json:
+          schema:
+            type: object
+    403.BitrixAccessDenied:
+      description: Bitrix24 access denied
+      content:
+        text/html:
+          schema:
+            type: string
+    500.BitrixFail:
+      description: B24 connection error
+      content:
+        text/html:
+          schema:
+            type: string
+    500.Insurance.PaymentProfileError:
+      description: Payment profile error
+      content:
+        text/html:
+          schema:
+            type: string
+    403.Partners.CantEditDeal:
+      description: Can't edit this deal
+      content:
+        text/html:
+          schema:
+            type: string
+    403.Partners.NoPartnerData:
+      description: No Partner data found
+      content:
+        text/html:
+          schema:
+            type: string
+            
+    403.Personal.AuthFail:
+      description: Partner Auth fail
+      content:
+        text/html:
+          schema:
+            type: string
+    403.Personal.CantEdit:
+      description: Disallow specialty update on specific stage id
+      content:
+        text/html:
+          schema:
+            type: string
+
+    500.PartnerApplication.PaymentProfileError:
+      description: Partner User creation error
+      content:
+        text/html:
+          schema:
+            type: string
+
+    503.ErrorContactData:
+      description: Error happened while requesting contact data
+      content:
+        text/html:
+          schema:
+            type: string
+    413.FileSizeTooLarge:
+      description: File size too large
+      content:
+        text/html:
+          schema:
+            type: string
+    400.FileUploadError:
+      description: File upload error
+      content:
+        text/html:
+          schema:
+            type: string
+    400.FileSizeTooSmall:
+      description: File size too small
+      content:
+        text/html:
+          schema:
+            type: string
+security:
+  - cookieAuthPlusCSRF: []
+
+  #{"showArrivalBlock":false,"transfer":null,"transferConstants":{"ARRIVAL_STATUS_NEW":"328","ARRIVAL_STATUS_COMPLETED":"329","ARRIVAL_STATUS_CANCELED":"330","TRANSFER_STATUS_NEW":"331","TRANSFER_STATUS_AWAIT":"332","TRANSFER_STATUS_IN_PROGRESS":"333","TRANSFER_STATUS_COMPLETED":"334","TRANSFER_STATUS_NONE":"335"}}
